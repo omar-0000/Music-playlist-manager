@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace MusicPlaylist
 {
@@ -31,6 +32,8 @@ namespace MusicPlaylist
     {
         public Song head;
         private Song current;
+        private bool loopEnabled = false;
+
 
         public Playlist()
         {
@@ -269,9 +272,15 @@ namespace MusicPlaylist
 
         public void PlayNext()
         {
+            if (head == null)
+            {
+                Console.WriteLine("Playlist is empty.");
+                return;
+            }
+
             if (current == null)
                 current = head;
-            else
+            else if (!loopEnabled)
                 current = current.Next;
 
             if (current != null)
@@ -310,6 +319,43 @@ namespace MusicPlaylist
             current = temp;
             Console.WriteLine($"Now playing: {current}");
         }
+        public void ToggleLoop()
+        {
+            loopEnabled = !loopEnabled;
+            Console.WriteLine($"Looping is now {(loopEnabled ? "enabled" : "disabled")}.");
+        }
+
+        public void DisplayStatistics()
+        {
+            if (head == null)
+            {
+                Console.WriteLine("Playlist is empty.");
+                return;
+            }
+
+            int count = 0;
+            int totalDuration = 0;
+            Song temp = head;
+
+            while (temp != null)
+            {
+                count++;
+                totalDuration += temp.DurationInSeconds;
+                temp = temp.Next;
+            }
+
+            double average = (double)totalDuration / count;
+
+            Console.WriteLine($"Total songs: {count}");
+            Console.WriteLine($"Total duration: {totalDuration} seconds");
+            Console.WriteLine($"Average duration: {average:F2} seconds");
+        }
+
+
+
+
+
+
     }
 
     class Program
@@ -338,6 +384,9 @@ namespace MusicPlaylist
                 Console.WriteLine("9. Delete by title");
                 Console.WriteLine("10. Delete by position");
                 Console.WriteLine("11. Exit");
+                Console.WriteLine("12. Toggle loop current song");
+                Console.WriteLine("13. Display playlist statistics");
+
 
                 Console.Write("Enter your choice: ");
                 string choice = Console.ReadLine();
@@ -347,27 +396,46 @@ namespace MusicPlaylist
                     case "1": playlist.PlayNext(); break;
                     case "2": playlist.PlayPrevious(); break;
                     case "3": playlist.PrintAllSongs(); break;
+
                     case "4":
                         Console.Write("Enter song title: ");
                         string s = Console.ReadLine();
                         int pos = playlist.SearchByTitle(s);
                         Console.WriteLine(pos == -1 ? "Not found" : $"Found at position {pos}");
                         break;
+
                     case "5": playlist.SortByArtist(); break;
                     case "6": playlist.SortByDuration(); break;
                     case "7": playlist.Shuffle(); break;
                     case "8": playlist.AddSongManually(); break;
+
                     case "9":
                         Console.Write("Enter title: ");
                         playlist.DeleteSongByTitle(Console.ReadLine());
                         break;
+
                     case "10":
                         Console.Write("Enter position: ");
                         playlist.DeleteSongByPosition(int.Parse(Console.ReadLine()));
                         break;
-                    case "11": exit = true; break;
-                    default: Console.WriteLine("Invalid option."); break;
+
+                    case "11":
+                        exit = true;
+                        break;
+
+                    case "12":
+                        playlist.ToggleLoop();
+                        break;
+
+                    case "13":
+                        playlist.DisplayStatistics();
+                        break;
+
+                    default:
+                        Console.WriteLine("Invalid option.");
+                        break;
                 }
+
 
                 if (!exit)
                 {
